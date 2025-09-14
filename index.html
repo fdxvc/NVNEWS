@@ -1,177 +1,65 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
-  />
-  <title>NVDA — Widget</title>
-  <meta name="theme-color" content="#000000" />
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div class="tradingview-widget-container__widget"></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+  {
+  "colorTheme": "dark",
+  "dateRange": "1M",
+  "locale": "fr",
+  "largeChartUrl": "",
+  "isTransparent": true,
+  "showFloatingTooltip": false,
+  "plotLineColorGrowing": "rgba(76, 175, 80, 1)",
+  "plotLineColorFalling": "rgba(242, 54, 69, 1)",
+  "gridLineColor": "rgba(240, 243, 250, 0)",
+  "scaleFontColor": "#DBDBDB",
+  "belowLineFillColorGrowing": "rgba(41, 98, 255, 0.12)",
+  "belowLineFillColorFalling": "rgba(41, 98, 255, 0.12)",
+  "belowLineFillColorGrowingBottom": "rgba(41, 98, 255, 0)",
+  "belowLineFillColorFallingBottom": "rgba(41, 98, 255, 0)",
+  "symbolActiveColor": "rgba(41, 98, 255, 0.12)",
+ 
+      "symbols": [
+        {
+          "s": "FOREXCOM:SPXUSD",
+          "d": "S&P 500 Index"
+        },
+        {
+          "s": "FOREXCOM:NSXUSD",
+          "d": "US 100 Cash CFD"
+        },
+        {
+          "s": "FOREXCOM:DJI",
+          "d": "Dow Jones Industrial Average Index"
+        }
+        {
+          "s": "NASDAQ:NVDA",
+          "d": "",
+          "logoid": "nvidia",
+          "currency-logoid": "country/US"
+        },        
+        {
+          "s": "BITSTAMP:BTCUSD",
+          "d": "",
+          "base-currency-logoid": "crypto/XTVCBTC",
+          "currency-logoid": "country/US"
+        },
+        {
+          "s": "FOREXCOM:XAUUSD",
+          "d": "",
+          "logoid": "metal/gold",
+          "currency-logoid": "country/US"
+        }
+    }
+  ],
+  "support_host": "https://www.tradingview.com",
+  "backgroundColor": "#0f0f0f",
+  "width": 230,
+  "height": 460,
+  "showSymbolLogo": false,
+  "showChart": true
+}
+  </script>
+</div>
 
-  <style>
-    :root {
-      --accent: #FF4D08; /* leuchtorange */
-      --fg: #ffffff;     /* texte principal */
-      --bg: transparent; /* fond transparent */
-    }
 
-    /* PowerGrotesk local (hors iframe TradingView) */
-    @font-face {
-      font-family: "PowerGrotesk";
-      src: url("./assets/fonts/PowerGrotesk-Regular.ttf") format("truetype");
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
-    }
-
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: "PowerGrotesk", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      touch-action: manipulation;
-      overflow: hidden; /* écran tactile type app */
-    }
-
-    /* Layout portrait-first, mais adaptatif */
-    .app {
-      position: fixed;
-      inset: 0;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 8px;
-      padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom) 12px;
-      background: transparent; /* laisse voir le fond derrière (translucide) */
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      background: rgba(0,0,0,0.08);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 10px 12px;
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-    }
-    .title {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .title h1 {
-      font-size: clamp(18px, 4.5vw, 22px);
-      line-height: 1.1;
-      margin: 0;
-      letter-spacing: 0.2px;
-      font-weight: 500;
-    }
-    .badge {
-      font-size: 12px;
-      padding: 2px 8px;
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 999px;
-      color: var(--fg);
-      opacity: 0.9;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    button {
-      appearance: none;
-      border: none;
-      border-radius: 14px;
-      padding: 10px 12px;
-      font: inherit;
-      color: var(--fg);
-      background: rgba(255, 77, 8, 0.12);
-      outline: 1px solid rgba(255, 77, 8, 0.35);
-      cursor: pointer;
-      transition: transform 0.06s ease, background 0.2s ease, outline-color 0.2s ease;
-      touch-action: manipulation;
-    }
-    button:active { transform: scale(0.98); }
-    button:hover { background: rgba(255, 77, 8, 0.18); }
-
-    .widget-shell {
-      position: relative;
-      min-height: 0;
-      border-radius: 16px;
-      overflow: hidden;
-      /* cadre léger translucide pour délimiter, sans casser la transparence */
-      outline: 1px solid rgba(255,255,255,0.06);
-      background: rgba(0,0,0,0.02);
-    }
-
-    /* Conteneur responsive qui remplit l'espace disponible */
-    .widget-fill {
-      position: absolute;
-      inset: 0;
-      display: grid;
-    }
-
-    /* Pied */
-    footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 4px;
-      opacity: 0.9;
-      font-size: 12px;
-    }
-    a {
-      color: var(--fg);
-      text-decoration: none;
-      border-bottom: 1px dotted rgba(255,255,255,0.35);
-    }
-    .hint {
-      opacity: 0.75;
-    }
-
-    /* Petits écrans étroits : gros cibles tactiles */
-    @media (max-width: 420px) {
-      button { padding: 10px 12px; }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <header>
-      <div class="title">
-        <h1>NVDA — Quotes</h1>
-        <span class="badge">TradingView</span>
-      </div>
-      <div class="actions">
-        <button id="btnRefresh" aria-label="Rafraîchir le widget">↻ Rafraîchir</button>
-      </div>
-    </header>
-
-    <div class="widget-shell">
-      <div id="tvHost" class="widget-fill">
-        <!-- Le script TradingView sera injecté ici par app.js pour un load propre -->
-      </div>
-    </div>
-
-    <footer>
-      <span class="hint">Fond app : transparent · Typo : PowerGrotesk · Accent : <span style="color:var(--accent)">#FF4D08</span></span>
-      <a href="https://www.tradingview.com" target="_blank" rel="noopener nofollow">TradingView</a>
-    </footer>
-  </div>
-
-  <script src="./app.js"></script>
-</body>
-</html>
