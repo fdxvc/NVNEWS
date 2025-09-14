@@ -1,17 +1,152 @@
-<!-- TradingView Widget BEGIN -->
-<div class="tradingview-widget-container">
-  <div class="tradingview-widget-container__widget"></div>
-  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
-  {
-  "displayMode": "adaptive",
-  "feedMode": "symbol",
-  "symbol": "NASDAQ:NVDA",
-  "colorTheme": "dark",
-  "isTransparent": true,
-  "locale": "en",
-  "width": "100%",
-  "height": "100%"
-}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>R1 Watch & Chart</title>
+  <meta name="theme-color" content="#00000000" />
+  <style>
+    :root {
+      --accent: rgb(255, 77, 8);
+      --bg: transparent;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.6);
+      --card: rgba(255,255,255,0.06);
+      --card-hover: rgba(255,255,255,0.1);
+      --border: rgba(255,255,255,0.15);
+      --radius: 20px;
+      --shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    @font-face {
+      font-family: 'PowerGrotesk';
+      src: url('https://raw.githubusercontent.com/RishaanDevz/awesomefonts/refs/heads/main/PowerGrotesk-Regular%20(1).ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: 'PowerGrotesk', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .app { position: relative; height: 100%; overflow: hidden; padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); box-sizing: border-box; }
+    header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .brand{ font-size:18px; letter-spacing:.3px; }
+    .pill{ border:1px solid var(--border); border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted); }
+    .viewport{ position: absolute; inset: 48px 12px 12px 12px; overflow: hidden; border-radius: var(--radius); }
+    .pages{ display:flex; width:300%; height:100%; transition: transform .28s ease; }
+    .page{ width:33.3333%; padding:10px; box-sizing:border-box; }
+    .card{ height:100%; background: var(--card); backdrop-filter: blur(2px); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); display:flex; flex-direction:column; }
+    .title{ font-size:16px; margin: 10px; }
+    .subtitle{ color:var(--muted); font-size:12px; margin: 0 10px 10px; }
+    .list{ overflow: hidden; position: relative; flex: 1; }
+    .list-inner{ position:absolute; inset:0; overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none; }
+    .list-inner::-webkit-scrollbar{ display:none; }
+    .row{ display:grid; grid-template-columns: 1fr auto; align-items:center; gap:8px; padding:10px 12px; margin:8px; border:1px solid var(--border); border-radius:14px; background:linear-gradient(180deg, rgba(255,77,8,0.14), rgba(255,77,8,0.06)); }
+    .row.active{ outline:2px solid var(--accent); outline-offset:2px; background: var(--card-hover); }
+    .ticker{ font-size:16px; }
+    .price{ font-size:14px; color:var(--muted); }
+    #chartCard{ display:flex; flex-direction:column; }
+    #chartHead{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px; }
+    #chartSymbol{ font-size:16px; }
+    #tvChart{ flex:1; min-height: 240px; border-top:1px solid var(--border); }
+    footer{ position:absolute; left:12px; right:12px; bottom:12px; display:flex; justify-content:space-between; align-items:center; gap:8px; pointer-events:none; }
+    .hint{ pointer-events:auto; font-size:11px; color:var(--muted); background:#111; border:1px solid var(--border); border-radius:10px; padding:6px 8px; }
+    .tab{ pointer-events:auto; border:1px solid var(--border); background:var(--card); border-radius:12px; padding:6px 10px; font-size:12px; }
+    .tab.active{ background: var(--accent); color:#000; border-color: transparent; font-weight:600; }
+    :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:8px; }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header>
+      <div class="brand">R1 — Watch & Chart</div>
+      <div class="pill">swipe ◄ ► • wheel</div>
+    </header>
+    <div class="viewport" id="viewport">
+      <div class="pages" id="pages" style="transform: translateX(0%);">
+        <section class="page">
+          <div class="card">
+            <h1 class="title">Watchlist</h1>
+            <p class="subtitle">Wheel = déplacer • Click = ouvrir le graphique</p>
+            <div class="list"><div class="list-inner" id="list"></div></div>
+          </div>
+        </section>
+        <section class="page">
+          <div class="card" id="chartCard">
+            <div id="chartHead">
+              <div><div id="chartSymbol">—</div><div class="subtitle" id="chartInfo">TradingView widget</div></div>
+              <div>
+                <button class="tab active" id="tab1D">1D</button>
+                <button class="tab" id="tab1W">1W</button>
+                <button class="tab" id="tab1M">1M</button>
+              </div>
+            </div>
+            <div id="tvChart"></div>
+          </div>
+        </section>
+        <section class="page">
+          <div class="card">
+            <h1 class="title">Heatmap</h1>
+            <div style="flex:1; overflow:hidden; border-radius: var(--radius);">
+              <!-- TradingView Widget BEGIN -->
+              <div class="tradingview-widget-container" style="height:100%; width:100%;">
+                <div class="tradingview-widget-container__widget"></div>
+                <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Stock heatmap by TradingView</span></a></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+                {
+                  "dataSource": "SPX500",
+                  "blockSize": "market_cap_basic",
+                  "blockColor": "Perf.YTD",
+                  "grouping": "sector",
+                  "locale": "en",
+                  "symbolUrl": "",
+                  "colorTheme": "dark",
+                  "exchanges": [],
+                  "hasTopBar": false,
+                  "isDataSetEnabled": false,
+                  "isZoomEnabled": true,
+                  "hasSymbolTooltip": true,
+                  "isMonoSize": false,
+                  "width": "100%",
+                  "height": "100%"
+                }
+                </script>
+              </div>
+              <!-- TradingView Widget END -->
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <footer>
+      <div class="hint">Swipe ◄ ► pour pages 1:Watchlist • 2:Chart • 3:Heatmap</div>
+      <div class="hint">Accent : #FF4D08 • Police : PowerGrotesk</div>
+    </footer>
+  </div>
+  <script src="https://s3.tradingview.com/tv.js"></script>
+  <script>
+    const symbols = [
+      { s: 'NASDAQ:NVDA', name: 'NVIDIA' },
+      { s: 'AMEX:SPY', name: 'S&P 500 ETF' },
+      { s: 'NASDAQ:QQQ', name: 'Nasdaq 100 ETF' },
+      { s: 'AMEX:EEM', name: 'MSCI Emerging Mkts' },
+      { s: 'AMEX:IYR', name: 'US Real Estate' },
+      { s: 'CRYPTO:BTCUSD', name: 'Bitcoin / USD' }
+    ];
+    let idx = 0; let page = 0; let interval = '1D';
+    const pagesEl = document.getElementById('pages');
+    const listEl  = document.getElementById('list');
+    function renderList(){ listEl.innerHTML=''; symbols.forEach((it,i)=>{ const row=document.createElement('button'); row.className='row'+(i===idx?' active':''); row.setAttribute('data-i',i); row.innerHTML=`<div class="ticker">${it.s}</div><div class="price">${it.name}</div>`; row.onclick=()=>{ idx=i; syncSelection(true); goToPage(1); }; listEl.appendChild(row); }); ensureRowInView(); }
+    function ensureRowInView(){ const active=listEl.querySelector('.row.active'); if(!active) return; const wrap=listEl.closest('.list-inner'); const ar=active.getBoundingClientRect(); const wr=wrap.getBoundingClientRect(); if (ar.top<wr.top) wrap.scrollTop+=ar.top-wr.top-8; if (ar.bottom>wr.bottom) wrap.scrollTop+=ar.bottom-wr.bottom+8; }
+    function goToPage(p){ page=Math.max(0,Math.min(2,p)); pagesEl.style.transform=`translateX(${-page*100}%)`; }
+    (function attachSwipe(){ const vp=document.getElementById('viewport'); let sx=0,dx=0,touching=false; vp.addEventListener('touchstart',e=>{ touching=true; sx=e.touches[0].clientX; dx=0; },{passive:true}); vp.addEventListener('touchmove',e=>{ if(!touching) return; dx=e.touches[0].clientX-sx; },{passive:true}); vp.addEventListener('touchend',()=>{ if(!touching) return; touching=false; if(dx<-40) goToPage(page+1); else if(dx>40) goToPage(page-1); }); })();
+    window.addEventListener('wheel',(e)=>{ if(Math.abs(e.deltaY)<1) return; if(e.deltaY>0) moveSelection(1); else moveSelection(-1); },{passive:true});
+    window.addEventListener('r1wheel',(e)=>{ const dir=e.detail?.dir||0; if(dir!==0) moveSelection(dir); });
+    function moveSelection(d){ idx=(idx+d+symbols.length)%symbols.length; syncSelection(true); }
+    let tvWidget=null; function mountTV(){ const sym=symbols[idx].s; document.getElementById('chartSymbol').textContent=sym; if(tvWidget&&tvWidget.remove){ tvWidget.remove(); tvWidget=null; } tvWidget=new TradingView.widget({ container_id:'tvChart', autosize:true, symbol:sym, interval:interval, timezone:'Europe/Paris', theme:'dark', style:'1', locale:'fr', hide_legend:false, toolbar_bg:'rgba(0,0,0,0)', hide_top_toolbar:false, allow_symbol_change:false, studies:[], }); }
+    function setIntervalTV(v){ interval=v; mountTV(); document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); const map={'1D':'tab1D','1W':'tab1W','1M':'tab1M'}; const el=document.getElementById(map[v]); if(el) el.classList.add('active'); }
+    document.getElementById('tab1D').onclick=()=> setIntervalTV('1D'); document.getElementById('tab1W').onclick=()=> setIntervalTV('1W'); document.getElementById('tab1M').onclick=()=> setIntervalTV('1M');
+    function syncSelection(updateChart){ renderList(); if(updateChart) mountTV(); }
+    renderList(); mountTV();
+    window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') goToPage(page+1); if(e.key==='ArrowLeft') goToPage(page-1); if(e.key==='ArrowDown') moveSelection(1); if(e.key==='ArrowUp') moveSelection(-1); });
+    document.documentElement.style.background='transparent';
   </script>
-</div>
-<!-- TradingView Widget END -->
+</body>
+</html>
